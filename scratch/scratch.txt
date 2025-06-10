@@ -1,3 +1,5 @@
+note : index.html all inline = single file
+
 <!DOCTYPE html>
 <html>
 <head>

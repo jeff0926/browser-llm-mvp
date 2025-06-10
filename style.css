@@ -1,0 +1,174 @@
+/*
+ * Basic styling for the entire page and core elements.
+ * Using Arial, sans-serif for general text.
+ * Max width for content ensures readability on large screens.
+ */
+body {
+    font-family: Arial, sans-serif;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 20px;
+    border: 1px solid #eee;
+    box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    background-color: #f9f9f9;
+    border-radius: 8px; /* Rounded corners for the main body container */
+}
+
+h1, h2 {
+    color: #333;
+    text-align: center;
+}
+
+/*
+ * Styling for the text input area.
+ * calc(100% - 22px) accounts for padding and border to maintain full width.
+ * min-height and vertical resize allow user control over size.
+ */
+textarea {
+    width: calc(100% - 22px);
+    min-height: 120px;
+    margin-bottom: 15px;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 16px;
+    resize: vertical;
+}
+
+/*
+ * Styling for the main submit button.
+ * Ensures full width and good visual feedback on hover and disabled states.
+ */
+button {
+    display: block;
+    width: 100%;
+    padding: 12px 20px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    font-size: 18px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin-bottom: 10px;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+button:disabled {
+    background-color: #cccccc;
+    cursor: not-allowed;
+}
+
+/*
+ * Styles for the tab container.
+ * Overflow hidden to contain floats (tab buttons).
+ */
+.tabs {
+    overflow: hidden;
+    border: 1px solid #ccc;
+    background-color: #f1f1f1;
+    border-radius: 4px 4px 0 0;
+}
+
+/*
+ * Style the individual tab buttons within the tab container.
+ * Inherit background for seamless look.
+ */
+.tab-button {
+    background-color: inherit;
+    float: left;
+    border: none;
+    outline: none;
+    cursor: pointer;
+    padding: 14px 16px;
+    transition: 0.3s;
+    font-size: 17px;
+    width: 50%; /* Each tab takes half width, useful for two tabs */
+    border-radius: 0;
+    margin-bottom: 0;
+    box-sizing: border-box; /* Include padding and border in the element's total width and height */
+}
+
+/* Change background color of tab buttons on hover */
+.tab-button:hover {
+    background-color: #ddd;
+}
+
+/* Style the active/current tab button */
+.tab-button.active {
+    background-color: #ccc;
+    border-bottom: 3px solid #007bff; /* Highlight active tab with a blue border */
+}
+
+/*
+ * Style for the tab content containers.
+ * Hidden by default, shown when active.
+ */
+.tab-content {
+    display: none;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-top: none; /* No top border to connect seamlessly with the tabs */
+    border-radius: 0 0 4px 4px;
+    min-height: 100px;
+}
+
+.tab-content.active {
+    display: block;
+}
+
+/*
+ * Specific styles for the result and log output areas.
+ * Monospace font for code/output, scrollable for long content.
+ */
+#resultOutput, #logOutput {
+    background-color: #e9ecef;
+    padding: 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    min-height: 80px;
+    margin-top: 0;
+    white-space: pre-wrap; /* Preserves whitespace and line breaks */
+    font-family: monospace;
+    color: #333;
+    overflow-y: auto; /* Enable vertical scrolling */
+    max-height: 300px; /* Limit height to prevent excessive scrolling */
+}
+
+/*
+ * Styles for individual log entries within the log output.
+ * Includes timestamp, message type styling.
+ */
+.log-entry {
+    margin-bottom: 5px;
+    padding-bottom: 5px;
+    border-bottom: 1px dashed #c0c0c0; /* Dashed line separates entries */
+    word-wrap: break-word; /* Prevents long words from overflowing */
+}
+
+.log-entry:last-child {
+    border-bottom: none; /* No border for the last entry for cleaner look */
+}
+
+.log-timestamp {
+    font-size: 0.8em; /* Smaller font for timestamps */
+    color: #666;
+    margin-right: 8px;
+    font-weight: bold;
+}
+
+.log-message.error {
+    color: #dc3545; /* Red for error messages */
+    font-weight: bold;
+}
+
+.log-message.success {
+    color: #28a745; /* Green for success messages */
+}
+
+.log-message.info {
+    color: #007bff; /* Blue for informational messages */
+}
