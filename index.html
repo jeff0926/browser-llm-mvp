@@ -1,20 +1,405 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Browser LLM MVP</title>
+    <title>Browser LLM MVP V2</title>
+    <!-- Link your CSS file for styling -->
     <link rel="stylesheet" href="style.css">
+    <style>
+        /*
+         * Basic styling for the entire page and core elements.
+         * Using Arial, sans-serif for general text.
+         * Max width for content ensures readability on large screens.
+         */
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 600px;
+            margin: 40px auto;
+            padding: 20px;
+            border: 1px solid #eee;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            background-color: #f9f9f9;
+            border-radius: 8px; /* Rounded corners for the main body container */
+        }
+
+        h1, h2 {
+            color: #333;
+            text-align: center;
+        }
+
+        /*
+         * Styling for the text input area.
+         * calc(100% - 22px) accounts for padding and border to maintain full width.
+         * min-height and vertical resize allow user control over size.
+         */
+        textarea {
+            width: calc(100% - 22px);
+            min-height: 120px;
+            margin-bottom: 15px;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            font-size: 16px;
+            resize: vertical;
+        }
+
+        /*
+         * Styling for the main submit button.
+         * Ensures full width and good visual feedback on hover and disabled states.
+         */
+        button {
+            display: block;
+            width: 100%;
+            padding: 12px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        button:disabled {
+            background-color: #cccccc;
+            cursor: not-allowed;
+        }
+
+        /*
+         * Styles for the tab container.
+         * Overflow hidden to contain floats (tab buttons).
+         */
+        .tabs {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 4px 4px 0 0;
+        }
+
+        /*
+         * Style the individual tab buttons within the tab container.
+         * Inherit background for seamless look.
+         */
+        .tab-button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 14px 16px;
+            transition: 0.3s;
+            font-size: 17px;
+            width: 50%; /* Each tab takes half width, useful for two tabs */
+            border-radius: 0;
+            margin-bottom: 0;
+            box-sizing: border-box; /* Include padding and border in the element's total width and height */
+        }
+
+        /* Change background color of tab buttons on hover */
+        .tab-button:hover {
+            background-color: #ddd;
+        }
+
+        /* Style the active/current tab button */
+        .tab-button.active {
+            background-color: #ccc;
+            border-bottom: 3px solid #007bff; /* Highlight active tab with a blue border */
+        }
+
+        /*
+         * Style for the tab content containers.
+         * Hidden by default, shown when active.
+         */
+        .tab-content {
+            display: none;
+            padding: 20px;
+            border: 1px solid #ccc;
+            border-top: none; /* No top border to connect seamlessly with the tabs */
+            border-radius: 0 0 4px 4px;
+            min-height: 100px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /*
+         * Specific styles for the result and log output areas.
+         * Monospace font for code/output, scrollable for long content.
+         */
+        #resultOutput, #logOutput {
+            background-color: #e9ecef;
+            padding: 15px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 80px;
+            margin-top: 0;
+            white-space: pre-wrap; /* Preserves whitespace and line breaks */
+            font-family: monospace;
+            color: #333;
+            overflow-y: auto; /* Enable vertical scrolling */
+            max-height: 300px; /* Limit height to prevent excessive scrolling */
+        }
+
+        /*
+         * Styles for individual log entries within the log output.
+         * Includes timestamp, message type styling.
+         */
+        .log-entry {
+            margin-bottom: 5px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed #c0c0c0; /* Dashed line separates entries */
+            word-wrap: break-word; /* Prevents long words from overflowing */
+        }
+
+        .log-entry:last-child {
+            border-bottom: none; /* No border for the last entry for cleaner look */
+        }
+
+        .log-timestamp {
+            font-size: 0.8em; /* Smaller font for timestamps */
+            color: #666;
+            margin-right: 8px;
+            font-weight: bold;
+        }
+
+        .log-message.error {
+            color: #dc3545; /* Red for error messages */
+            font-weight: bold;
+        }
+
+        .log-message.success {
+            color: #28a745; /* Green for success messages */
+        }
+
+        .log-message.info {
+            color: #007bff; /* Blue for informational messages */
+        }
+    </style>
 </head>
 <body>
-    <h1>Browser LLM MVP</h1>
+    <h1>Browser LLM MVP V2</h1>
 
+    <!-- Text input area for the user -->
     <textarea id="inputText" placeholder="Enter your text here..."></textarea>
+    <!-- Button to trigger the language model task -->
     <button id="submitButton">Run Task</button>
 
-    <h2>Result:</h2>
-    <div id="output"></div>
+    <h2>Output:</h2>
+    <!-- Tab navigation for output -->
+    <div class="tabs">
+        <button class="tab-button active" onclick="openTab(event, 'Result')">Result</button>
+        <button class="tab-button" onclick="openTab(event, 'Log')">Log</button>
+    </div>
 
+    <!-- Tab content for results -->
+    <div id="Result" class="tab-content active">
+        <div id="resultOutput"></div>
+    </div>
+
+    <!-- Tab content for log messages -->
+    <div id="Log" class="tab-content">
+        <div id="logOutput"></div>
+    </div>
+
+    <!-- Load TensorFlow.js library from CDN. It provides the core ML functionalities. -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@latest"></script>
+    <!-- Load the Universal Sentence Encoder (USE) model from CDN.
+         This is our "small language model" for generating text embeddings. -->
     <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/universal-sentence-encoder"></script>
-    <script src="app.js"></script>
+    <!-- Your custom JavaScript application logic -->
+    <script>
+        // Get references to the HTML elements
+        const inputText = document.getElementById('inputText');
+        const submitButton = document.getElementById('submitButton');
+        const resultOutputDiv = document.getElementById('resultOutput');
+        const logOutputDiv = document.getElementById('logOutput');
+
+        let model; // This variable will hold our loaded TensorFlow.js model instance
+        // Predefined phrases for semantic similarity task.
+        // Their embeddings will be calculated once the model is loaded.
+        const predefinedPhrases = [
+            { text: "How do I reset my password?", embedding: null },
+            { text: "Where is customer support?", embedding: null },
+            { text: "I need help with my bill.", embedding: null },
+            { text: "Tell me about your product features.", embedding: null },
+            { text: "What are your operating hours?", embedding: null }
+        ];
+
+        /**
+         * Logs events to the new log output div with a timestamp and message type.
+         * @param {string} message - The message to log.
+         * @param {string} type - The type of message ('info', 'success', 'error').
+         */
+        function logEvent(message, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = document.createElement('div');
+            logEntry.classList.add('log-entry');
+            logEntry.innerHTML = `<span class="log-timestamp">[${timestamp}]</span> <span class="log-message ${type}">${message}</span>`;
+            logOutputDiv.prepend(logEntry); // Add new logs to the top
+            // Optionally keep the log clean by removing old entries
+            if (logOutputDiv.children.length > 50) { // Keep max 50 log entries
+                logOutputDiv.removeChild(logOutputDiv.lastChild);
+            }
+        }
+
+        /**
+         * Function to switch between tabs (Result and Log).
+         * @param {Event} evt - The click event object.
+         * @param {string} tabName - The ID of the tab content to display ('Result' or 'Log').
+         */
+        function openTab(evt, tabName) {
+            let i, tabcontent, tabbuttons;
+
+            // Get all elements with class="tab-content" and hide them
+            tabcontent = document.getElementsByClassName("tab-content");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].classList.remove('active');
+            }
+
+            // Get all elements with class="tab-button" and remove the "active" class
+            tabbuttons = document.getElementsByClassName("tab-button");
+            for (i = 0; i < tabbuttons.length; i++) {
+                tabbuttons[i].classList.remove('active');
+            }
+
+            // Show the current tab content, and add an "active" class to the clicked button
+            document.getElementById(tabName).classList.add('active');
+            evt.currentTarget.classList.add('active');
+        }
+
+        // Set the default tab to "Result" on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Ensure the Result tab is active when the page first loads
+            document.getElementById('Result').classList.add('active');
+            document.querySelector('.tab-button').classList.add('active');
+        });
+
+        /**
+         * Loads the Universal Sentence Encoder (USE) model from TensorFlow.js.
+         * This function is called once when the page loads.
+         */
+        async function loadModel() {
+            resultOutputDiv.innerText = "Initializing application...";
+            logEvent("Application starting...");
+            logEvent("Loading the Universal Sentence Encoder model (this might take a moment)...");
+            submitButton.disabled = true; // Disable button while loading
+
+            try {
+                // Load the USE model from the CDN
+                model = await use.load();
+                logEvent("Model loaded successfully!", 'success');
+
+                // Calculate embeddings for predefined phrases
+                logEvent("Calculating embeddings for predefined phrases...");
+                for (let i = 0; i < predefinedPhrases.length; i++) {
+                    const phraseEmbeddings = await model.embed(predefinedPhrases[i].text);
+                    predefinedPhrases[i].embedding = phraseEmbeddings.arraySync()[0];
+                    logEvent(`Embedded phrase: "${predefinedPhrases[i].text.substring(0, 30)}..."`, 'info');
+                }
+                logEvent("Predefined phrase embeddings calculated.", 'success');
+
+
+                resultOutputDiv.innerText = "Model loaded successfully! Enter text and click 'Run Task' for semantic similarity.";
+                submitButton.disabled = false; // Enable button once model is ready
+            } catch (error) {
+                resultOutputDiv.innerText = `Error loading model: ${error.message}. Check Log tab for details.`;
+                logEvent(`ERROR: Failed to load model: ${error.message}`, 'error');
+                console.error("Model loading error:", error);
+            }
+        }
+
+        /**
+         * Calculates the cosine similarity between two vectors (embeddings).
+         * @param {number[]} vecA - The first vector.
+         * @param {number[]} vecB - The second vector.
+         * @returns {number} The cosine similarity score (between -1 and 1).
+         */
+        function calculateCosineSimilarity(vecA, vecB) {
+            let dotProduct = 0;
+            let magnitudeA = 0;
+            let magnitudeB = 0;
+
+            for (let i = 0; i < vecA.length; i++) {
+                dotProduct += vecA[i] * vecB[i];
+                magnitudeA += vecA[i] * vecA[i];
+                magnitudeB += vecB[i] * vecB[i];
+            }
+
+            magnitudeA = Math.sqrt(magnitudeA);
+            magnitudeB = Math.sqrt(magnitudeB);
+
+            if (magnitudeA === 0 || magnitudeB === 0) {
+                return 0; // Avoid division by zero if a vector is zero
+            }
+
+            return dotProduct / (magnitudeA * magnitudeB);
+        }
+
+        /**
+         * Handles the click event for the submit button.
+         * It takes the input text, processes it with the loaded model,
+         * performs semantic similarity, and displays the result and logs events.
+         */
+        submitButton.addEventListener('click', async () => {
+            const text = inputText.value.trim();
+
+            if (!text) {
+                resultOutputDiv.innerText = "Please enter some text in the input field before running the task.";
+                logEvent("Validation: Input text field is empty.", 'info');
+                return;
+            }
+
+            if (!model) {
+                resultOutputDiv.innerText = "Model is not loaded yet. Please wait or refresh the page.";
+                logEvent("Error: Attempted to run task before model was loaded.", 'error');
+                return;
+            }
+
+            resultOutputDiv.innerText = "Processing text with the Universal Sentence Encoder model and finding similarity...";
+            logEvent(`User input received: "${text.substring(0, 50)}..."`, 'info');
+            logEvent("Generating embeddings for user input...", 'info');
+            submitButton.disabled = true;
+
+            try {
+                const embeddings = await model.embed(text);
+                const inputEmbedding = embeddings.arraySync()[0];
+                logEvent("User input embeddings generated successfully.", 'success');
+
+                let bestMatch = { text: "No close match found.", similarity: -1 };
+                logEvent("Comparing user input to predefined phrases...", 'info');
+
+                // Iterate through predefined phrases and find the most similar one
+                for (const phrase of predefinedPhrases) {
+                    // Ensure the phrase has an embedding before comparison
+                    if (phrase.embedding) {
+                        const similarity = calculateCosineSimilarity(inputEmbedding, phrase.embedding);
+                        logEvent(`Compared with "${phrase.text.substring(0, 30)}...": Similarity = ${similarity.toFixed(4)}`, 'info');
+                        if (similarity > bestMatch.similarity) {
+                            bestMatch = { text: phrase.text, similarity: similarity };
+                        }
+                    }
+                }
+
+                // Display the result in the Result tab
+                resultOutputDiv.innerText = `Input text processed.\n\nMost similar predefined phrase: "${bestMatch.text}"\nSimilarity score: ${bestMatch.similarity.toFixed(4)}`;
+                logEvent(`Semantic similarity task completed. Best match found: "${bestMatch.text.substring(0, 30)}..." with score ${bestMatch.similarity.toFixed(4)}.`, 'success');
+
+            } catch (error) {
+                resultOutputDiv.innerText = `An error occurred while running the task: ${error.message}. Check Log tab for details.`;
+                logEvent(`ERROR: Failed to process text for similarity: ${error.message}`, 'error');
+                console.error("Task execution error:", error);
+            } finally {
+                submitButton.disabled = false; // Ensure button is re-enabled
+            }
+        });
+
+        // Immediately call loadModel() when the script starts to load the ML model
+        loadModel();
+    </script>
 </body>
 </html>
